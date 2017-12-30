@@ -1,0 +1,7 @@
+working_directory: /home/noeluz/opt
+experiment: prr5
+genome: /home/noeluz/prr5_data/chromosome1.fa
+annotation: /home/noeluz/prr5_data/chromosome1.gtf
+control: /home/noeluz/prr5_data/input_prr5_chr1.fastq
+chip: /home/noeluz/prr5_data/chip_prr5_chr1.fastq
+intersection: /home/noeluz/prr5_data/all_genes_athaliana.txt
