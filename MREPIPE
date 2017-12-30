@@ -1,0 +1,80 @@
+#! /bin/bash
+
+## Copyright 2017 Luz Marina Martin and Noelia Almagro
+
+## This file is part of MREPIPE
+
+## MREPIPE is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+
+## MREPIPE is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+
+## You should have received a copy of the GNU General Public License
+## along with MREPIPE.  If not, see <http://www.gnu.org/licenses/>.
+
+if [ $# -eq 0 ]
+then
+   echo "Usage: MREPIPE parameter_file.txt control.fastq chip.fastq"
+   exit
+fi
+
+## Reading in parameters from PARAM_FILE
+
+PARAM_FILE=$1
+
+WORKING_DIR=$( grep working_directory: $PARAM_FILE | awk '{print $2}' )
+EXPERIMENT=$( grep experiment: $PARAM_FILE | awk '{print $2}' )
+GENOME=$( grep genome: $PARAM_FILE | awk '{print $2}' )
+ANNOTATION=$( grep annotation: $PARAM_FILE | awk '{print $2}' )
+SAMPLE_CONTROL=$( grep control: $PARAM_FILE | awk '{print $2}' )
+SAMPLE_CHIP=$( grep chip: $PARAM_FILE | awk '{print $2}' )
+INTERSECTION=$( grep intersection: $PARAM_FILE | awk 'print $2' )
+
+## Making the experiment directory
+
+cd $WORKING_DIR
+mkdir $EXPERIMENT
+
+cd $EXPERIMENT
+
+echo "working_directory:" $WORKING_DIR > logs.txt
+echo "experiment_name:" $EXPERIMENT >> $WORKING_DIR/$EXPERIMENT/logs.txt
+echo "genome:" $GENOME >> $WORKING_DIR/$EXPERIMENT/logs.txt
+echo "annotation:" $ANNOTATION >> $WORKING_DIR/$EXPERIMENT/logs.txt
+
+## Making the directory structure
+
+echo "Creating working directory structure"
+echo "Creating working directory structure" >> $WORKING_DIR/$EXPERIMENT/logs.txt
+
+$HOME/opt/MREPIPE/directory_structure.sh $SAMPLE_CONTROL $SAMPLE_CHIP $WORKING_DIR $EXPERIMENT $GENOME $ANNOTATION
+
+## Parallel processing of samples
+
+echo "Mapping control sample"
+echo "Mapping control sample" >> $WORKING_DIR/$EXPERIMENT/logs.txt
+
+cd $WORKING_DIR/$EXPERIMENT/samples/control
+
+qsub -N control -o log_control $HOME/opt/MREPIPE/mapping_sample.sh "control" $WORKING_DIR $EXPERIMENT $INTERSECTION
+
+echo "Mapping chip sample"
+echo "Mapping chip sample" >> $WORKING_DIR/$EXPERIMENT/logs.txt
+
+cd $WORKING_DIR/$EXPERIMENT/samples/chip
+
+qsub -N chip -o log_chip $HOME/opt/MREPIPE/mapping_sample.sh "chip" $WORKING_DIR $EXPERIMENT $INTERSECTION
+
+##################
+
+cd $WORKING_DIR/$EXPERIMENT
+
+qstat -u '*'
+
+echo "Drink a beer senza glutine while the mapping"
+echo "Drink a beer senza glutine while the mapping" >> $WORKING_DIR/$EXPERIMENT/logs.txt
