@@ -3,7 +3,7 @@ ChIP-Seq Analysis
 
 MREPIPE is a program to analyse CHIP-seq samples.
 
-##INSTALLATION:
+## INSTALLATION:
 To install MREPIPE follow these steps:
 
 Download the zip file MREPIPE.zip to a directory of your choice. The opt directory is recommended.
